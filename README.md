@@ -29,3 +29,36 @@ maxmemory 도달한 경우 eviction 정책 설정
 - `allkeys-random` : 랜덤하게 삭제
 - `volatile-random` : expire field가 true로 설정된 항목들 중에서 랜덤하게 삭제
 - `volatile-ttl` : expire field가 true로 설정된 항목들 중에서 짧은 TTL 순으로 삭제
+
+---
+
+## 시스템 튜닝
+
+### Redis 성능 측정 (redis-benchmark)
+
+- redis-benchmark 유틸리티를 이용해 Redis의 성능을 측정할 수 있음
+
+```bash
+# redis-benchmark [-h host] [-p port] [-c clients] [-n requests]
+```
+
+ex) redis-benchmark -c 100 -n 100 -t SET
+
+![image](https://user-images.githubusercontent.com/40031858/224584250-ad229d16-e0d8-4c5f-9228-d9eaf8c58b96.png)
+
+
+### Redis 성능에 영향을 미치는 요소들
+
+- Network bandwidth & latency : Redis의 throughput은 주로 network에 의해 결정되는 경우가 많음.
+
+    운영 환경에 런치하기 전에 배포 환경으 network 대역폭과 실제 throughput을 체크하는 것이 좋음
+
+- CPU : 싱글 스레드로 동작하는 Redis 특성 상 CPU 성능이 중요. 코어 수보다는 큰 cache를 가진 빠른 CPU가 선호됨
+- RAM 속도 & 대역폭 : 10KB 이하 데이터 항목들에 대해서는 큰 영향이 없음
+- 가상화 환경의 영향 : VM에서 실행되는 경우 개별적인 영향이 있을 수 있음(non-local disk, 오래된 hypervisor의 느린 fork 구현 등)
+
+### 성능에 영향을 미치는 Redis 설정
+
+- rdbcompression < yes/no> : RDB 파일을 압축할지 여부로, CPU를 절약하고 싶은 경우 no 선택
+- rdbchecksum < yes/no> : 사용시 RDB의 안정성을 높일 수 있으나 파일 저장/로드 시에 10%정도의 성능 저하 있음
+- save : RDB 파일 생성시 시스템 자원이 소모되므로 성능에 영향이 있음
