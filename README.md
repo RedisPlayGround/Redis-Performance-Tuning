@@ -62,3 +62,31 @@ ex) redis-benchmark -c 100 -n 100 -t SET
 - rdbcompression < yes/no> : RDB 파일을 압축할지 여부로, CPU를 절약하고 싶은 경우 no 선택
 - rdbchecksum < yes/no> : 사용시 RDB의 안정성을 높일 수 있으나 파일 저장/로드 시에 10%정도의 성능 저하 있음
 - save : RDB 파일 생성시 시스템 자원이 소모되므로 성능에 영향이 있음
+
+---
+
+## SLOWLOG를 이용한 쿼리 튜닝
+
+- 수행시간이 설정한 기준 시간 이상인 쿼리의 로그를 보여줌
+- 측정 기준인 수행시간은 I/O 동작을 제외함
+
+`로깅되는 기준 시간(microseconds)`
+
+    slowlog-log-slower-than 10000
+
+`로그 최대 길이`
+
+    slowlog-max-len 128
+
+### SLOWLOG 명령어
+
+`slowlog 개수 확인`
+
+    slowlog len
+
+`slowlog 조회`
+    
+    slowlog get [count]
+=> 일련번호, 시간, 소요시간, 명령어, 클라이언트 IP, 클라이언트 이름
+
+![image](https://user-images.githubusercontent.com/40031858/224585138-04991dde-d68e-435a-910a-308e5ed6479f.png)
