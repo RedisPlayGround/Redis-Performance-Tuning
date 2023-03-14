@@ -130,3 +130,29 @@ ex) redis-benchmark -c 100 -n 100 -t SET
 - CRDTs를 이용한 매끄러운 충돌 해결
 - CRDB의 다수 인스턴스(지역DB)에 장애가 발생하더라도 계속 운영가능한 비즈니스 연속성 제공
 
+## 데이터 충돌을 최소화하는 CRDTs
+
+### CRDT(Conflict-Free Replicated Data TYPE)란?
+
+- 분산 환경에서 여러 노드들 간에 복제되는 데이터 구조로 아래 3개 특성을 가짐
+  - 각 노드는 로컬에서 독립적으로 값을 업데이트할 수 있음
+  - 노드간에 발생할 수 있는 데이터 충돌은 해당 데이터 타입에 맞는 알고리즘이 해결
+  - 동일 데이터에 대해 노드들간에 일시적으로 다른 값을 가질 수 있지만 최종적으로는 같아짐
+- 2011년에 등장했으며, 공유 문서 동시 편집 문제를 해결하려고 고안됨
+
+![image](https://user-images.githubusercontent.com/40031858/224945851-017caae6-70cc-4358-ae0b-556f02b3a197.png)
+
+### Redis의 충돌 해결
+
+- 각 CRDB 인스턴스는 각자의 데이터셋에 vector clock을 유지함(vector clock: 데이터 일관성 관리를 위한 정보)
+- 동기화 요청이 왔을 때 해당 데이터의 vector clock을 비교해 old, new, concurrent로 분류함
+- concurrent일 떄는 아래처럼 충돌 해소 로직을 수행
+  - CRDT인 경우에는 바로 해결 가능(EX: Counter)
+  - non-CRDT인 경우 LWW(Last Write Wins)를 적용 (Ex: String)
+  - 같은 데이터에 대해 서로 다른 Command가 충돌하면 미리 정의된 규칙에 따름
+
+### Redis의 충돌 해결 규칙 예제(Command 충돌 시)
+
+- APPEND vs DEL : update동작인 APPEND가 이김
+- EXPIRE vs PERSIST : 긴 TTL을 가지는 PERSIST가 이김
+- SADD vs SREM : 데이터 삭제보다 업데이트 동작인 SADD가 이김
