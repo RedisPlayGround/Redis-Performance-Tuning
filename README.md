@@ -90,3 +90,43 @@ ex) redis-benchmark -c 100 -n 100 -t SET
 => 일련번호, 시간, 소요시간, 명령어, 클라이언트 IP, 클라이언트 이름
 
 ![image](https://user-images.githubusercontent.com/40031858/224585138-04991dde-d68e-435a-910a-308e5ed6479f.png)
+
+---
+
+## Active-Active Architecture
+
+`Active-Active Architecture` : 레디스 엔터프라이즈에서 제공하는 기능으로 multi-master를 뜻함.
+
+### 어떤 문제를 해결하려고 나왔냐면??
+
+#### 글로벌 서비스 혹은 다중 지역(multi-region) 서비스의 어려움
+
+- 한 지역에 서버를 두고 서비스하면 멀리 떨어진 곳에서는 latency 문제가 있음
+- 여러 지역에 서버를 두면 데이터 일관성에 문제가 있음
+
+![image](https://user-images.githubusercontent.com/40031858/224939836-e30336ef-c9e0-4c09-841c-91710626a276.png)
+
+#### Redis Enterprise
+
+- Enterprise급 기능을 제공하는 유료 제품
+- Redis Labs에 의해 제공
+- On-premise와 cloud 환경 둘 다 지원
+- 제한 없는 선형 확장성, 향상된 고가용성, 추가 보안 기능, 기술 지원 등의 이점이 있음
+- Active-Active 아키텍처 지원
+
+### `Active-Active Architecture`
+
+- 지역적으로 분산된 글로벌 데이터베이스를 유지하면서, 여러 위치에서 동일한 데이터에 대한 읽기/쓰기를 허용
+- multi-master 구조로 생각할 수 있음
+- 지역적으로 빠른 latency를 확보하면서도 데이터 일관성을 유지하는 형태
+- 학술적으로 입증된 CRDT(Conflict-Free Replicated Data Types)를 활용해 자동으로 데이터 충돌을 해소
+- 여러 클러스터에 연결되어 글로벌 데이터베이스를 이루는 것을 CRDB(Conflict-Free Replicated Database)라고 지칭
+
+![image](https://user-images.githubusercontent.com/40031858/224940855-cda46bd9-e243-4cc4-bb11-92ad6ffc62ca.png)
+
+### `Active-Active Architecture의 장점`
+
+- 분산된 지역의 수와 상관없이 지역적으로 낮은 latency로 읽기/쓰기 작업을 수행
+- CRDTs를 이용한 매끄러운 충돌 해결
+- CRDB의 다수 인스턴스(지역DB)에 장애가 발생하더라도 계속 운영가능한 비즈니스 연속성 제공
+
